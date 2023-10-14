@@ -131,6 +131,7 @@ steps:
 
         echo "##vso[task.setvariable variable=servicePrincipalId]$ARM_CLIENT_ID"
         terraform plan -out current.plan -lock=false
+        echo $ARM_CLIENT_ID
  
     env:
       TF_VAR_ENV_ID: $(TF_VAR_ENV_ID)
