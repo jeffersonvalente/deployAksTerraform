@@ -1,4 +1,4 @@
-data "azure_client_config" "current" {}
+data "azuread_client_config" "current" {}
 
 resource "azuread_application" "spn" {
     display_name = var.SERVICE_PRINCIPAL_NAME
