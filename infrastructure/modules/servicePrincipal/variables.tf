@@ -1,1 +1,0 @@
-variable "SERVICE_PRINCIPAL_NAME" {}
