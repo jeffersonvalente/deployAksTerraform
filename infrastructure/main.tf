@@ -16,9 +16,9 @@ resource "azurerm_resource_group" "main" {
   location = var.LOCATION
 }
 
-module "servicePrincipal" {
-  source= "./modules/servicePrincipal"
-  SERVICE_PRINCIPAL_NAME = var.SERVICE_PRINCIPAL_NAME
+module "security" {
+  source= "./modules/security"
+  AKS_SPN = var.AKS_SPN
 
   depends_on = [
     azurerm_resource_group.main
