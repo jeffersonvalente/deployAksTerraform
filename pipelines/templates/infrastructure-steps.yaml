@@ -37,7 +37,7 @@ steps:
         if [ $RG_EXISTS == false ];
         then
             echo "Creating resource group: ${{ parameters.terraformRgName }}" 
-            az group create --location brazilsouth --name '${{ parameters.terraformRgName }}'
+            az group create --location eastus --name '${{ parameters.terraformRgName }}'
         fi
 
   - task: AzureCLI@2
@@ -51,13 +51,13 @@ steps:
 
         if [ -z "$STORAGEACCOUNT_ID" ]; then
           echo "Creating storage account" 
-          az storage account create --name ${{ parameters.terraformStorageAccountName }} --resource-group ${{ parameters.terraformRgName }} --location brazilsouth --sku Standard_LRS --allow-blob-public-access false --default-action Deny
+          az storage account create --name ${{ parameters.terraformStorageAccountName }} --resource-group ${{ parameters.terraformRgName }} --location eastus --sku Standard_LRS --allow-blob-public-access false --default-action Deny
                           
           CURRENT_IP=`curl checkip.amazonaws.com`
           az storage account network-rule add -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --ip-address $CURRENT_IP
           
           echo "Sleeping 2mins to await network rule propagation"          
-          sleep 180
+          sleep 120
 
           echo "Creating container"
           az storage container create --name terraform --account-name ${{ parameters.terraformStorageAccountName }}
