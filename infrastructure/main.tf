@@ -28,3 +28,12 @@ module "keyvault" {
     azurerm_resource_group.main
   ]
 }
+
+module "aks" {
+  source= "./modules/aks"
+  RGNAME     = var.RGNAME
+  LOCATION   = var.LOCATION
+  AKS_SPN    = var.AKS_SPN
+  AKS_SPN_PWD = var.AKS_SPN_PWD
+  SSH_PUBLIC_KEY = var.SSH_PUBLIC_KEY
+}

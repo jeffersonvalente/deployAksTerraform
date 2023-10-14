@@ -141,7 +141,7 @@ steps:
       TF_VAR_SERVICE_PRINCIPAL_NAME: $(TF_VAR_SERVICE_PRINCIPAL_NAME)
       TF_VAR_AKS_SPN: $(TF_VAR_AKS_SPN)
       TF_VAR_AKS_SPN_PWD: $(TF_VAR_AKS_SPN_PWD)
-
+      TF_VAR_SSH_PUBLIC_KEY: $(TF_VAR_SSH_PUBLIC_KEY)
 
   - task: AzureCLI@2
     displayName: "Apply terraform changes"

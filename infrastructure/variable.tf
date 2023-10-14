@@ -5,3 +5,4 @@ variable "SUBSCRIPTION_ID" {}
 variable "SERVICE_PRINCIPAL_NAME" {}
 variable "AKS_SPN" {}
 variable "AKS_SPN_PWD" {}
+variable "SSH_PUBLIC_KEY" {}
