@@ -137,6 +137,8 @@ steps:
       TF_VAR_SUBSCRIPTION_ID: $(TF_VAR_SUBSCRIPTION_ID)
       TF_VAR_RGNAME: $(TF_VAR_RGNAME)
       TF_VAR_LOCATION: $(TF_VAR_LOCATION)
+      TF_VAR_SERVICE_PRINCIPAL_NAME: $(TF_VAR_SERVICE_PRINCIPAL_NAME)
+
 
   - task: AzureCLI@2
     displayName: "Apply terraform changes"
