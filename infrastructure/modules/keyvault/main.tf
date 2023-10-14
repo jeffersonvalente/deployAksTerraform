@@ -28,6 +28,26 @@ resource "azurerm_key_vault" "akv" {
       "Purge",
     ]
   }
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "6baf3e0f-4d67-48b1-85e5-69bb0756aa79"
+
+    key_permissions = [
+      "Create",
+      "Get",
+    ]
+
+    secret_permissions = [
+      "Get",
+      "List",
+      "Set",
+      "Delete",
+      "Recover",
+      "Backup",
+      "Restore",
+      "Purge",
+    ]
+  }
 }
 
 
