@@ -15,13 +15,3 @@ resource "azurerm_resource_group" "main" {
   name     = var.RGNAME
   location = var.LOCATION
 }
-
-module "security" {
-  source= "./modules/security"
-  AKS_SPN = var.AKS_SPN
-  SUBSCRIPTION_ID = var.SUBSCRIPTION_ID
-
-  depends_on = [
-    azurerm_resource_group.main
-  ]
-}
