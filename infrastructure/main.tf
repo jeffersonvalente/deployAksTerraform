@@ -19,4 +19,8 @@ resource "azurerm_resource_group" "main" {
 module "servicePrincipal" {
   source= "./modules/servicePrincipal"
   SERVICE_PRINCIPAL_NAME = var.SERVICE_PRINCIPAL_NAME
+
+  depends_on = [
+    azurerm_resource_group.main
+  ]
 }
