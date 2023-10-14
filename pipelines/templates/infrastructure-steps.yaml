@@ -1,0 +1,162 @@
+parameters:
+- name: serviceConnectionName
+  type: string    
+  default: ''
+  
+- name: terraformRgName
+  type: string    
+  default: ''
+
+- name: applyChanges
+  type: boolean    
+  default: false
+
+- name: terraformWorkingFolder 
+  type: string    
+  default: ''
+
+- name: terraformStorageAccountName 
+  type: string    
+  default: ''
+
+- name: stage 
+  type: string    
+  default: ''
+
+steps:
+  - checkout: self
+  - task: AzureCLI@2
+    displayName: "Create (if not exists) terraform resource group"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        RG_EXISTS=`az group exists --name ${{ parameters.terraformRgName }}`
+
+        if [ $RG_EXISTS == false ];
+        then
+            echo "Creating resource group: ${{ parameters.terraformRgName }}" 
+            az group create --location brazilsouth --name '${{ parameters.terraformRgName }}'
+        fi
+
+  - task: AzureCLI@2
+    displayName: "Create (if not exists) Terraform Storage Account"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        STORAGEACCOUNT_ID=`az storage account list --resource-group ${{ parameters.terraformRgName }} --query "[?name=='${{ parameters.terraformStorageAccountName }}'].id" --output tsv`
+
+        if [ -z "$STORAGEACCOUNT_ID" ]; then
+          echo "Creating storage account" 
+          az storage account create --name ${{ parameters.terraformStorageAccountName }} --resource-group ${{ parameters.terraformRgName }} --location brazilsouth --sku Standard_LRS --allow-blob-public-access false --default-action Deny
+                          
+          CURRENT_IP=`curl checkip.amazonaws.com`
+          az storage account network-rule add -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --ip-address $CURRENT_IP
+          
+          echo "Sleeping 2mins to await network rule propagation"          
+          sleep 180
+
+          echo "Creating container"
+          az storage container create --name terraform --account-name ${{ parameters.terraformStorageAccountName }}
+        else
+          echo "Skipping. Storage account ${{ parameters.terraformStorageAccountName }} already exists."
+        fi
+
+
+  - task: AzureCLI@2
+    displayName: "Update Storage Account Network Rules"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        ips=`az storage account network-rule list -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --query ipRules[*].ipAddressOrRange -o tsv`
+        for ip in $ips; do az storage account network-rule remove -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --ip-address $ip; done  
+
+        CURRENT_IP=`curl checkip.amazonaws.com`
+        az storage account network-rule add -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --ip-address $CURRENT_IP
+
+
+  - task: AzureCLI@2
+    displayName: "Await network rule propagation"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        sleep 120
+
+
+  - task: AzureCLI@2
+    displayName: "Get Storage Key"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        key=$(az storage account keys list -g ${{ parameters.terraformRgName }} -n ${{ parameters.terraformStorageAccountName }} --query [0].value -o tsv)
+        echo "##vso[task.setvariable variable=TF_STORAGE_ACCOUNT_NAME_KEY]$key"
+
+  - task: AzureCLI@2
+    displayName: "Initialize terraform backend"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      addSpnToEnvironment: true
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      workingDirectory: ${{ parameters.terraformWorkingFolder }}
+      inlineScript: |        
+        terraform init \
+        -backend-config="storage_account_name=${{ parameters.terraformStorageAccountName }}" \
+        -backend-config="access_key=$(TF_STORAGE_ACCOUNT_NAME_KEY)" \
+        -backend-config="container_name=terraform" \
+        -backend-config="key=terraform.tfstate" \
+
+  - task: AzureCLI@2
+    displayName: "Plan terraform changes"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'      
+      workingDirectory: ${{ parameters.terraformWorkingFolder }}
+      addSpnToEnvironment: true
+      inlineScript: | 
+        export TF_VAR_CURRENT_IP=`curl checkip.amazonaws.com`
+        export ARM_CLIENT_ID=$servicePrincipalId
+        export ARM_CLIENT_SECRET=$servicePrincipalKey
+        export ARM_TENANT_ID=$tenantId
+
+        echo "##vso[task.setvariable variable=servicePrincipalId]$ARM_CLIENT_ID"
+        terraform plan -out current.plan -lock=false
+ 
+    env:
+      TF_VAR_ENV_ID: $(TF_VAR_ENV_ID)
+      TF_VAR_SUBSCRIPTION_ID: $(TF_VAR_SUBSCRIPTION_ID)
+
+  - task: AzureCLI@2
+    displayName: "Apply terraform changes"
+    condition: eq('${{ parameters.applyChanges }}', true)
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      workingDirectory: ${{ parameters.terraformWorkingFolder }}
+      addSpnToEnvironment: true
+      inlineScript: | 
+        export ARM_CLIENT_ID=$servicePrincipalId
+        export ARM_CLIENT_SECRET=$servicePrincipalKey
+        export ARM_TENANT_ID=$tenantId
+        terraform apply -lock=false current.plan
+
+  - task: AzureCLI@2
+    displayName: "Update Storage Account Network Rules"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        CURRENT_IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+        az storage account network-rule remove -g ${{ parameters.terraformRgName }} --account-name ${{ parameters.terraformStorageAccountName }} --ip-address $CURRENT_IP  
