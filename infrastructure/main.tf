@@ -15,3 +15,8 @@ resource "azurerm_resource_group" "main" {
   name     = var.RGNAME
   location = var.LOCATION
 }
+
+module "servicePrincipal" {
+  source= "/modules/servicePricipal"
+  SERVICE_PRINCIPAL_NAME = var.SERVICE_PRINCIPAL_NAME
+}
