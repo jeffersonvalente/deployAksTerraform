@@ -1,0 +1,33 @@
+pool:
+  vmImage: "ubuntu-latest"
+
+trigger: none
+
+parameters:
+- name: applyChanges
+  displayName: "Apply terraform changes?"
+  default: false
+  type: boolean
+
+stages:
+
+
+  - stage: dev
+    displayName: "DEV"
+    dependsOn: []
+    variables:
+    - group: "estudos-terraform-dev"     
+    jobs:
+    - job: azureUpdate
+      timeoutInMinutes: 180
+      displayName: "Update Azure Resources"
+      steps:
+
+        - template: templates/infrastructure-steps.yaml
+          parameters:
+            applyChanges: ${{ parameters.applyChanges }}
+            serviceConnectionName: "sc-estudosterraform (SPN)"
+            terraformRgName: "rg-$(System.StageName)-terraform"
+            terraformWorkingFolder:  "./infrastructure"
+            terraformStorageAccountName : "terraformestudos$(System.StageName)"
+            stage: "dev"
