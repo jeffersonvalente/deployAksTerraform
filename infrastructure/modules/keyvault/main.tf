@@ -18,14 +18,19 @@ resource "azurerm_key_vault" "akv" {
     ]
 
     secret_permissions = [
-      "Set",
       "Get",
+      "List",
+      "Set",
       "Delete",
+      "Recover",
+      "Backup",
+      "Restore",
       "Purge",
-      "Recover"
     ]
   }
 }
+
+
 
 resource "azurerm_key_vault_secret" "terraformspn" {
   name         = var.AKS_SPN
