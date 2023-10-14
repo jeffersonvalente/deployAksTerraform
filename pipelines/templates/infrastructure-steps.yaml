@@ -89,7 +89,20 @@ steps:
       inlineScript: |
         sleep 120
 
-
+  - task: DownloadSecureFile@1
+    name: privateKeyFile
+    displayName: 'Download Private Key'
+    inputs:
+      secureFile: 'id_rsa.pub'
+  
+  - task: AzureCLI@2
+    displayName: "Set Key Variables"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        echo "##vso[task.setvariable variable=TF_VAR_SSH_PUBLIC_KEY]$(cat $(id_rsa.pub.secureFilePath))"
   - task: AzureCLI@2
     displayName: "Get Storage Key"
     inputs:
