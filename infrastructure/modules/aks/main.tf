@@ -1,9 +1,3 @@
-data "azurerm_kubernetes_service_versions" "current" {
-  location = var.LOCATION
-  include_preview = false  
-}
- 
-
 resource "azurerm_kubernetes_cluster" "aks-cluster" {
   name                  = "terraform-aks"
   location              = var.LOCATION
@@ -37,20 +31,4 @@ resource "azurerm_kubernetes_cluster" "aks-cluster" {
     client_id = var.AKS_SPN
     client_secret = var.AKS_SPN_PWD
   }
-
-
-
-  linux_profile {
-    admin_username = "ubuntu"
-    ssh_key {
-        key_data = file(var.SSH_PUBLIC_KEY)
-    }
-  }
-
-  network_profile {
-      network_plugin = "azure"
-      load_balancer_sku = "standard"
-  }
-
-    
-  }
+}

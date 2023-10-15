@@ -35,5 +35,4 @@ module "aks" {
   LOCATION   = var.LOCATION
   AKS_SPN    = var.AKS_SPN
   AKS_SPN_PWD = var.AKS_SPN_PWD
-  SSH_PUBLIC_KEY = var.SSH_PUBLIC_KEY
 }

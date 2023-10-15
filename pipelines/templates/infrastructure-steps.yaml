@@ -98,23 +98,7 @@ steps:
       inlineScript: |
         key=$(az storage account keys list -g ${{ parameters.terraformRgName }} -n ${{ parameters.terraformStorageAccountName }} --query [0].value -o tsv)
         echo "##vso[task.setvariable variable=TF_STORAGE_ACCOUNT_NAME_KEY]$key"
-
-
-  - task: DownloadSecureFile@1
-    name: privateKeyFile
-    displayName: 'Download Private Key'
-    inputs:
-      secureFile: 'id_rsa.pub'
-  
-  - task: AzureCLI@2
-    displayName: "Set Key Variables"
-    inputs:
-      azureSubscription: ${{ parameters.serviceConnectionName }}
-      scriptType: "bash"
-      scriptLocation: "inlineScript"
-      inlineScript: |
-        echo "##vso[task.setvariable variable=TF_VAR_SSH_PUBLIC_KEY]$(cat $(id_rsa.pub.secureFilePath))"
-        
+              
   - task: AzureCLI@2
     displayName: "Initialize terraform backend"
     inputs:
