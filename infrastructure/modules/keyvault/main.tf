@@ -1,7 +1,7 @@
 data "azurerm_client_config" "current" {}
 data "azurerm_subscription" "current" {}
 resource "azurerm_key_vault" "akv" {
-  name                       = "akv-terraform-aks"
+  name                       = "{nome do keyvault}"
   location                   = var.LOCATION
   resource_group_name        = var.RGNAME
   tenant_id                  = data.azurerm_client_config.current.tenant_id

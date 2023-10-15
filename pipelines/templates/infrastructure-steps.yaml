@@ -37,7 +37,7 @@ steps:
         if [ $RG_EXISTS == false ];
         then
             echo "Creating resource group: ${{ parameters.terraformRgName }}" 
-            az group create --location eastus --name '${{ parameters.terraformRgName }}'
+            az group create --location {sua região} --name '${{ parameters.terraformRgName }}'
         fi
 
   - task: AzureCLI@2
@@ -137,7 +137,6 @@ steps:
       TF_VAR_SUBSCRIPTION_ID: $(TF_VAR_SUBSCRIPTION_ID)
       TF_VAR_RGNAME: $(TF_VAR_RGNAME)
       TF_VAR_LOCATION: $(TF_VAR_LOCATION)
-      TF_VAR_SERVICE_PRINCIPAL_NAME: $(TF_VAR_SERVICE_PRINCIPAL_NAME)
       TF_VAR_AKS_SPN: $(TF_VAR_AKS_SPN)
       TF_VAR_AKS_SPN_PWD: $(TF_VAR_AKS_SPN_PWD)
 

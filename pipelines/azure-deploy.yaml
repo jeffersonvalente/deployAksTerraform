@@ -26,8 +26,8 @@ stages:
         - template: templates/infrastructure-steps.yaml
           parameters:
             applyChanges: ${{ parameters.applyChanges }}
-            serviceConnectionName: "sc-estudosterraform"
+            serviceConnectionName: "{sua service connection}"
             terraformRgName: "rg-$(System.StageName)-terraform"
             terraformWorkingFolder:  "./infrastructure"
-            terraformStorageAccountName : "terraformestudos$(System.StageName)"
+            terraformStorageAccountName : "{Nome do storage que account}"
             stage: "dev"
