@@ -1,114 +1,99 @@
-# Deploy AKS com Terraform 🚀
 
-Este projeto automatiza o provisionamento de um cluster **Azure Kubernetes Service (AKS)** utilizando **Terraform**, integrando o **GitHub** com o **Azure DevOps** para implementar práticas de **Infraestrutura como Código (IaC)** de forma eficiente.
+# Deploy de AKS com Terraform
 
----
-
-## 📋 Pré-requisitos
-
-Antes de iniciar, certifique-se de ter:
-
-- **Conta no Azure** com permissões adequadas.
-- **Azure DevOps** configurado.
-- **GitHub** configurado.
-- **Terraform** instalado na máquina local.
-- **Azure CLI** instalada.
+Esse projeto automatiza o provisionamento de clusters AKS (Azure Kubernetes Service) usando Terraform, com pipelines integrados via Azure DevOps e GitHub.  
+A proposta é entregar uma base sólida para ambientes Kubernetes no Azure com infraestrutura versionada, rastreável e segura.
 
 ---
 
-## 🛠️ Configuração do Azure DevOps
+## Pré-requisitos
 
-1. **Criação de Biblioteca de Variáveis:**
+Antes de começar, você precisa de:
 
-   No Azure DevOps, crie uma biblioteca de variáveis com os seguintes parâmetros:
-
-   | Nome                   | Descrição                          | Exemplo             |
-   |------------------------|------------------------------------|---------------------|
-   | `TF_VAR_ENV_ID`        | Identificador do ambiente/stage    | `DEV`               |
-   | `TF_VAR_LOCATION`      | Região para o deploy               | `eastus`            |
-   | `TF_VAR_RGNAME`        | Nome do Resource Group             | `rg-aks-dev`        |
-   | `TF_VAR_AKS_SPN`       | Object ID do Service Principal     | `xxxxxxxx-xxxx-...` |
-   | `TF_VAR_AKS_SPN_PWD`   | Senha do Service Principal         | `senha_secreta`     |
-   | `TF_VAR_SUBSCRIPTION_ID` | ID da sua assinatura Azure       | `xxxxxxxx-xxxx-...` |
-
-   Essas variáveis serão utilizadas durante a execução do template de infraestrutura (`infrastructure-steps.yaml` nas linhas 135-142).
-
-2. **Configuração do Pipeline:**
-
-   - No arquivo `infrastructure/pipelines/azure-deploy.yaml`, substitua:
-     - `serviceConnectionName` na linha 29 pelo nome da sua conexão de serviço.
-     - `terraformStorageAccountName` na linha 32 pelo nome do seu Storage Account para o Terraform.
-
-   - No arquivo `infrastructure/pipelines/templates/infrastructure-steps.yaml`, ajuste:
-     - `location` na linha 40 para a região desejada.
-
-   - No módulo `infrastructure/modules/keyvault/main.tf`, altere:
-     - O nome do Key Vault na linha 4 conforme sua necessidade.
+- Conta Azure com permissões adequadas
+- Azure DevOps configurado
+- GitHub integrado ao pipeline
+- Terraform e Azure CLI instalados localmente
 
 ---
 
-## 🚀 Executando o Deploy
+## Variáveis no Azure DevOps
 
-1. **Clone o Repositório:**
+Crie uma **biblioteca de variáveis** no Azure DevOps com os seguintes campos:
 
-   ```bash
-   git clone https://github.com/jeffersonvalente/deployAksTerraform.git
-   cd deployAksTerraform
-   ```
+| Nome                     | Exemplo             |
+|--------------------------|---------------------|
+| TF_VAR_ENV_ID            | DEV                 |
+| TF_VAR_LOCATION          | eastus              |
+| TF_VAR_RGNAME            | rg-aks-dev          |
+| TF_VAR_AKS_SPN           | xxxxxxxx-xxxx-...   |
+| TF_VAR_AKS_SPN_PWD       | senha_secreta       |
+| TF_VAR_SUBSCRIPTION_ID   | xxxxxxxx-xxxx-...   |
 
-2. **Inicialize o Terraform:**
-
-   ```bash
-   terraform init
-   ```
-
-3. **Valide a Configuração:**
-
-   ```bash
-   terraform validate
-   ```
-
-4. **Aplique o Deploy:**
-
-   ```bash
-   terraform apply
-   ```
-
-   Confirme a execução quando solicitado. O Terraform provisionará os recursos conforme definido.
+Essas variáveis são usadas no pipeline `infrastructure-steps.yaml` (linhas 135 a 142).
 
 ---
 
-## 🧩 Estrutura do Projeto
+## Configuração do pipeline
 
-- `infrastructure/`: Contém os módulos e definições Terraform.
-- `pipelines/`: Inclui os arquivos de pipeline para integração com Azure DevOps.
-- `modules/`: Módulos reutilizáveis para provisionamento de recursos específicos.
+Ajuste os seguintes arquivos:
 
----
+- `infrastructure/pipelines/azure-deploy.yaml`
+  - Linha 29: altere `serviceConnectionName`
+  - Linha 32: defina `terraformStorageAccountName`
 
-## 📚 Recursos Adicionais
+- `infrastructure/pipelines/templates/infrastructure-steps.yaml`
+  - Linha 40: altere a região (`location`)
 
-- [Documentação do Terraform](https://www.terraform.io/docs)
-- [Documentação do Azure Kubernetes Service](https://docs.microsoft.com/azure/aks/)
-- [Integração do GitHub com Azure DevOps](https://docs.microsoft.com/azure/devops/pipelines/repos/github)
-
----
-
-## 🤝 Contribuições
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+- `infrastructure/modules/keyvault/main.tf`
+  - Linha 4: defina o nome do Key Vault
 
 ---
 
-## 📄 Licença
+## Como executar
 
-Este projeto está licenciado sob os termos da licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+```bash
+# clone o projeto
+git clone https://github.com/jeffersonvalente/deployAksTerraform.git
+cd deployAksTerraform
+
+# inicialize o Terraform
+terraform init
+
+# valide a configuração
+terraform validate
+
+# aplique o deploy
+terraform apply
+```
 
 ---
 
-## 📞 Contato
+## Estrutura do projeto
 
-Para dúvidas ou suporte, entre em contato:
+```plaintext
+deployAksTerraform/
+├── infrastructure/       # Código Terraform e módulos
+│   ├── pipelines/        # Pipelines YAML para Azure DevOps
+│   └── modules/          # Módulos reutilizáveis (ex: Key Vault, AKS)
+```
 
-- **Autor:** Jefferson Valente
-- **LinkedIn:** [jefferson-hoy-valente](https://www.linkedin.com/in/jefferson-hoy-valente/)
+---
+
+## Documentação útil
+
+- Terraform: https://www.terraform.io/docs  
+- AKS: https://docs.microsoft.com/azure/aks/  
+- GitHub + Azure DevOps: https://docs.microsoft.com/azure/devops/pipelines/repos/github
+
+---
+
+## Contribuições
+
+Se quiser sugerir ajustes, melhorar a estrutura ou incluir novos recursos, pull requests são bem-vindos.
+
+---
+
+## Contato
+
+LinkedIn: https://www.linkedin.com/in/jefferson-hoy-valente/
